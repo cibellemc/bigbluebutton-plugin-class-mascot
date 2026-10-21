@@ -129,3 +129,24 @@ body {
 .demo-sidekick-content {
   height: 100%;
 }
+
+.demo-nav-bar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: #f28c28;
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.demo-nav-bar-right {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}

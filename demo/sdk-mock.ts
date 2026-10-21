@@ -109,11 +109,43 @@ export class GenericContentSidekickArea {
   }
 }
 
+export enum NavBarItemPosition {
+  LEFT = 'left',
+  CENTER = 'center',
+  RIGHT = 'right',
+}
+
+interface NavBarButtonProps {
+  id?: string;
+  label: string;
+  icon: { svgContent?: unknown };
+  tooltip: string;
+  disabled: boolean;
+  position: NavBarItemPosition;
+  hasSeparator: boolean;
+  circle?: boolean;
+  hideLabel?: boolean;
+  dataTest?: string;
+  onClick: () => void;
+}
+
+export class NavBarButton {
+  id: string;
+
+  props: NavBarButtonProps;
+
+  constructor(props: NavBarButtonProps) {
+    this.id = props.id || `nav-bar-${Math.random().toString(36).slice(2)}`;
+    this.props = props;
+  }
+}
+
 // What the plugin injected into the UI; the demo shell renders it.
 export const uiStore = {
   appsGalleryItems: [] as AppsGalleryEntry[],
   floatingWindows: [] as FloatingWindow[],
   genericContentItems: [] as GenericContentSidekickArea[],
+  navBarItems: [] as NavBarButton[],
   // 'gallery', the id of a generic content panel, or null when the sidebar is closed.
   openPanel: 'gallery' as string | null,
 };
@@ -302,6 +334,10 @@ const pluginApi = {
   },
   setGenericContentItems: (items: GenericContentSidekickArea[]) => {
     uiStore.genericContentItems = items;
+    emitUiChange();
+  },
+  setNavBarItems: (items: NavBarButton[]) => {
+    uiStore.navBarItems = items;
     emitUiChange();
   },
   uiCommands: {

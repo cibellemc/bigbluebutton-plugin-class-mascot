@@ -7,10 +7,14 @@ import {
   spacingMedium,
 } from '@bigbluebutton/bbb-ui-components-react';
 
+// Width of the expanded card, also used to open it below the paw button.
+const CARD_WIDTH_REM = 15;
+
 const Card = styled.div<{ $minimized: boolean }>`
   display: flex;
   flex-direction: column;
-  width: ${({ $minimized }: { $minimized: boolean }) => ($minimized ? 'auto' : '15rem')};
+  width: ${({ $minimized }: { $minimized: boolean }) =>
+    $minimized ? 'auto' : `${CARD_WIDTH_REM}rem`};
   color: ${colors.text.default};
 `;
 
@@ -64,6 +68,17 @@ const Body = styled.div`
   padding: ${spacingSmall} ${spacingSmallMedium} ${spacingSmallMedium};
 `;
 
+// Reset and +1 side by side, with the same width.
+const Actions = styled.div`
+  display: flex;
+  gap: ${spacingSmall};
+
+  & > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+`;
+
 const Confirm = styled.div`
   display: flex;
   flex-direction: column;
@@ -81,6 +96,8 @@ const ConfirmActions = styled.div`
   }
 `;
 
+export { CARD_WIDTH_REM };
+
 export default {
   Card,
   Chip,
@@ -89,6 +106,7 @@ export default {
   Header,
   HeaderActions,
   Body,
+  Actions,
   Confirm,
   ConfirmActions,
 };

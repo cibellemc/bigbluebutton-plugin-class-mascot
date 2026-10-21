@@ -1,15 +1,14 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { BBButton, BBBSlider, BBBTypography } from '@bigbluebutton/bbb-ui-components-react';
+import { MdAdd, MdRestartAlt } from 'react-icons/md';
+import { BBButton, BBBTypography } from '@bigbluebutton/bbb-ui-components-react';
 
 import { INITIAL_POINTS, MASCOT_OPTIONS, MAX_POINTS } from '../constants';
 import { MascotModel, MascotState } from '../types';
-import MascotView from '../mascot-view/component';
 import MascotImage from '../mascot-image/component';
+import LevelBar from '../mascot-view/level-bar';
+import InactivityStepper from './inactivity-stepper';
 import Styled from './styles';
-
-const MIN_INACTIVITY_MINUTES = 1;
-const MAX_INACTIVITY_MINUTES = 30;
 
 interface ControlPanelProps {
   assetsBaseUrl: string;
@@ -53,13 +52,64 @@ function ControlPanel({
             flutuante.
           </BBBTypography>
         </Styled.Intro>
+        {/* Current level with the actions used during the class. */}
+        {mascotState && (
+          <Styled.Section aria-labelledby="class-mascot-status-title">
+            <BBBTypography variant="selected" id="class-mascot-status-title">
+              Status atual
+            </BBBTypography>
+            <BBBTypography>
+              {`Dê +1 ponto quando a turma participar. Reiniciar volta o mascote ao nível ${INITIAL_POINTS}. Os mesmos botões ficam na janela do mascote.`}
+            </BBBTypography>
+            <Styled.Status data-test="class-mascot-status">
+              <Styled.StatusRow>
+                <MascotImage
+                  assetsBaseUrl={assetsBaseUrl}
+                  model={mascotState.model}
+                  points={mascotState.points}
+                  size="option"
+                  decorative
+                />
+                <Styled.StatusLevel>
+                  <Styled.LevelText>{`Nível ${mascotState.points}/${MAX_POINTS}`}</Styled.LevelText>
+                  <LevelBar points={mascotState.points} />
+                </Styled.StatusLevel>
+              </Styled.StatusRow>
+              <Styled.StatusActions>
+                <BBButton
+                  fullWidth
+                  variant="secondary"
+                  size="sm"
+                  label="Reiniciar"
+                  iconStart={<MdRestartAlt />}
+                  ariaLabel={`Reiniciar pontos, volta ao nível ${INITIAL_POINTS}`}
+                  tooltipLabel={`Reiniciar (volta ao nível ${INITIAL_POINTS})`}
+                  disabled={!isReady || mascotState.points === INITIAL_POINTS}
+                  dataTest="class-mascot-reset"
+                  onClick={onReset}
+                />
+                <BBButton
+                  fullWidth
+                  size="sm"
+                  label="1 ponto"
+                  iconStart={<MdAdd />}
+                  ariaLabel="Adicionar 1 ponto de participação"
+                  disabled={!isReady || mascotState.points >= MAX_POINTS}
+                  onClick={onAddPoint}
+                />
+              </Styled.StatusActions>
+            </Styled.Status>
+          </Styled.Section>
+        )}
+
         <Styled.Section aria-labelledby="class-mascot-models-title">
           <BBBTypography variant="selected" id="class-mascot-models-title">
             Escolha o mascote
           </BBBTypography>
-          {!isReady && <BBBTypography variant="text3">Conectando à sala…</BBBTypography>}
+          <BBBTypography>Quem vai representar a turma?</BBBTypography>
+          {!isReady && <BBBTypography>Conectando à sala…</BBBTypography>}
           {mascotState?.visible === false && (
-            <BBBTypography variant="text3">
+            <BBBTypography>
               O mascote está fechado para a turma. Escolha um mascote para mostrá-lo de novo.
             </BBBTypography>
           )}
@@ -93,47 +143,13 @@ function ControlPanel({
         </Styled.Section>
 
         {mascotState && (
-          <>
-            <Styled.Preview>
-              <MascotView
-                assetsBaseUrl={assetsBaseUrl}
-                model={mascotState.model}
-                points={mascotState.points}
-              />
-            </Styled.Preview>
-            <BBBSlider
-              label="Tempo sem participação"
-              helperText={`O mascote perde 1 ponto a cada ${mascotState.inactivityMinutes} min sem participação`}
-              min={MIN_INACTIVITY_MINUTES}
-              max={MAX_INACTIVITY_MINUTES}
-              step={1}
-              value={mascotState.inactivityMinutes}
-              valueLabelDisplay="auto"
-              disabled={!isReady}
-              onChangeCommitted={(_, minutes) => onChangeInactivityMinutes(minutes)}
-            />
-          </>
+          <InactivityStepper
+            minutes={mascotState.inactivityMinutes}
+            disabled={!isReady}
+            onChange={onChangeInactivityMinutes}
+          />
         )}
       </Styled.Content>
-
-      {mascotState && (
-        <Styled.Footer>
-          <BBButton
-            fullWidth
-            variant="secondary"
-            label="Reiniciar pontos"
-            disabled={!isReady || mascotState.points === INITIAL_POINTS}
-            onClick={onReset}
-          />
-          <BBButton
-            fullWidth
-            label="+1 ponto"
-            ariaLabel="Adicionar 1 ponto de participação"
-            disabled={!isReady || mascotState.points >= MAX_POINTS}
-            onClick={onAddPoint}
-          />
-        </Styled.Footer>
-      )}
     </Styled.Panel>
   );
 }

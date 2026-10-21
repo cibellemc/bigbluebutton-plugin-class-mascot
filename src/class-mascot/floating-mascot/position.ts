@@ -1,5 +1,6 @@
 // Floating window preferences kept per browser, so they survive hiding the mascot
-// and reloading the room: where it was last dropped and whether it is minimized.
+// and reloading the room: where it was last dropped, whether it is minimized and
+// whether it was closed from the paw button in the top bar.
 interface FloatingPosition {
   top: number;
   left: number;
@@ -7,7 +8,10 @@ interface FloatingPosition {
 
 const POSITION_STORAGE_KEY = 'class-mascot:floating-position';
 const MINIMIZED_STORAGE_KEY = 'class-mascot:floating-minimized';
+const OPEN_STORAGE_KEY = 'class-mascot:floating-open';
 const DEFAULT_POSITION: FloatingPosition = { top: 80, left: 20 };
+// Space between the paw button and the window, and from the edge of the screen.
+const ANCHOR_GAP = 8;
 
 function readSavedPosition(): FloatingPosition {
   try {
@@ -17,6 +21,19 @@ function readSavedPosition(): FloatingPosition {
     // Storage blocked or invalid: fall back to the default.
   }
   return DEFAULT_POSITION;
+}
+
+// Like a dropdown: right below the anchor (the paw button in the top bar), with
+// both right edges aligned so the window grows to the left. Null while the anchor
+// is not in the page, e.g. a client that does not show plugin buttons in the top bar.
+function positionBelow(anchor: Element | null, widthRem: number): FloatingPosition | null {
+  if (!anchor) return null;
+  const rect = anchor.getBoundingClientRect();
+  const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  return {
+    top: rect.bottom + ANCHOR_GAP,
+    left: Math.max(ANCHOR_GAP, rect.right - widthRem * remPx),
+  };
 }
 
 // BBB moves the window with react-draggable, which stores the position as
@@ -56,4 +73,29 @@ function saveMinimized(minimized: boolean): void {
   }
 }
 
-export { readSavedPosition, savePositionOnDrop, readMinimized, saveMinimized };
+// Whether this user keeps the floating window open; it only affects their own view.
+function readOpen(): boolean {
+  try {
+    return localStorage.getItem(OPEN_STORAGE_KEY) !== 'false';
+  } catch {
+    return true;
+  }
+}
+
+function saveOpen(open: boolean): void {
+  try {
+    localStorage.setItem(OPEN_STORAGE_KEY, String(open));
+  } catch {
+    // Storage blocked: the choice lasts until the room is reloaded.
+  }
+}
+
+export {
+  readSavedPosition,
+  positionBelow,
+  savePositionOnDrop,
+  readMinimized,
+  saveMinimized,
+  readOpen,
+  saveOpen,
+};

@@ -119,6 +119,25 @@ function DemoShell() {
         <button type="button" onClick={resetDemo}>
           Zerar estado
         </button>
+        {/* Plugin buttons on the right of BBB's top bar; the demo only places RIGHT ones. */}
+        <span className="demo-nav-bar-right">
+          {uiStore.navBarItems
+            .filter((item) => item.props.position === 'right')
+            .map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className="demo-nav-bar-button"
+                title={item.props.tooltip}
+                aria-label={item.props.label}
+                data-test={item.props.dataTest}
+                disabled={item.props.disabled}
+                onClick={item.props.onClick}
+              >
+                {item.props.icon.svgContent as React.ReactNode}
+              </button>
+            ))}
+        </span>
       </header>
       <div className="demo-body">
         <nav className="demo-rail" aria-label="Menu lateral">

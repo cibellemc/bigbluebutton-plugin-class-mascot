@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { BBBTypography } from '@bigbluebutton/bbb-ui-components-react';
 
-import { MAX_POINTS, MIN_POINTS, MASCOT_OPTIONS } from '../constants';
+import { MAX_POINTS, MASCOT_OPTIONS } from '../constants';
 import { MascotModel } from '../types';
 import MascotImage from '../mascot-image/component';
 import { useLevelChange } from './level-change';
+import LevelBar from './level-bar';
 import Styled from './styles';
 
 interface MascotViewProps {
@@ -31,15 +32,7 @@ function MascotView({ assetsBaseUrl, model, points }: MascotViewProps): React.Re
         <BBBTypography variant="selected">{option?.label}</BBBTypography>
         <BBBTypography className="mascot-view-level">{`Nível ${points}/${MAX_POINTS}`}</BBBTypography>
       </Styled.Info>
-      <Styled.Bar
-        role="progressbar"
-        aria-valuemin={MIN_POINTS}
-        aria-valuemax={MAX_POINTS}
-        aria-valuenow={points}
-        aria-label="Nível do mascote"
-      >
-        <Styled.BarFill style={{ width: `${(points / MAX_POINTS) * 100}%` }} />
-      </Styled.Bar>
+      <LevelBar points={points} />
     </Styled.Wrapper>
   );
 }

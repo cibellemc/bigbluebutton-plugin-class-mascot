@@ -4,10 +4,11 @@ Plugin do BigBlueButton (SDK `1.0.0-beta.3`): a turma tem um mascote que evolui 
 
 ## Como funciona
 
-- O moderador abre **Mascote da turma** na galeria de apps e escolhe o mascote (Mconfito, Mconfito Pixel, Caramelo ou Frajola). Todo mascote começa no nível 3.
+- O moderador abre **Mascote da turma** na galeria de apps e escolhe o mascote (Mconfito Pixel, Caramelo ou Frajola). Todo mascote começa no nível 3.
 - O mascote aparece numa janela flutuante para todos da sala, com o nível atual.
 - O moderador confirma participações com **+1 ponto**, até o nível 10.
 - Qualquer pessoa pode minimizar a janela do mascote só para si; a escolha fica salva no navegador.
+- O botão de patinha à direita na barra superior esconde e mostra a janela do mascote, só para quem clicou. A janela abre logo abaixo do botão, como um menu.
 - Mensagens de alunos no chat público e reações de alunos zeram a contagem de inatividade, sem dar pontos. Quem registra essa atividade é o cliente de um moderador presente na sala.
 - Sem participação por um tempo configurável (padrão: 8 minutos), o mascote perde 1 ponto, até o nível 1.
 - O estado é compartilhado pelo data channel `mascot-state`. O desconto por inatividade não depende de nenhuma aba aberta: cada participante calcula o nível atual a partir da última atividade, então o mascote continua perdendo pontos mesmo sem moderador na sala.

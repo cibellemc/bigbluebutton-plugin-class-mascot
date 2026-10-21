@@ -1,9 +1,16 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { MdAdd, MdClose, MdExpandLess, MdExpandMore, MdOpenInFull } from 'react-icons/md';
+import {
+  MdAdd,
+  MdClose,
+  MdExpandLess,
+  MdExpandMore,
+  MdOpenInFull,
+  MdRestartAlt,
+} from 'react-icons/md';
 import { BBButton, BBBTypography } from '@bigbluebutton/bbb-ui-components-react';
 
-import { MASCOT_OPTIONS, MAX_POINTS } from '../constants';
+import { INITIAL_POINTS, MASCOT_OPTIONS, MAX_POINTS } from '../constants';
 import { MascotState } from '../types';
 import MascotView from '../mascot-view/component';
 import MascotImage from '../mascot-image/component';
@@ -16,6 +23,7 @@ interface FloatingMascotProps {
   mascotState: MascotState;
   isModerator: boolean;
   onAddPoint: () => void;
+  onReset: () => void;
   onOpenSettings: () => void;
   onHide: () => void;
 }
@@ -46,13 +54,14 @@ function IconButton({ icon, label, tooltip, dataTest, onClick }: IconButtonProps
 }
 
 // Content of the floating window everyone sees. Anyone can minimize it for
-// themselves; moderators also get a +1 shortcut, the settings panel and can hide
+// themselves; moderators also get +1 and reset shortcuts, the settings panel and can hide
 // the mascot for the whole class.
 function FloatingMascot({
   assetsBaseUrl,
   mascotState,
   isModerator,
   onAddPoint,
+  onReset,
   onOpenSettings,
   onHide,
 }: FloatingMascotProps): React.ReactElement {
@@ -78,7 +87,7 @@ function FloatingMascot({
     <BBButton
       size="sm"
       fullWidth={!minimized}
-      label={minimized ? '1' : '1 ponto de participação'}
+      label="1"
       ariaLabel="Adicionar 1 ponto de participação"
       iconStart={<MdAdd />}
       disabled={points >= MAX_POINTS}
@@ -182,7 +191,24 @@ function FloatingMascot({
           ) : (
             <Styled.Body>
               <MascotView assetsBaseUrl={assetsBaseUrl} model={model} points={points} />
-              {addPointButton}
+              {/* Just the buttons; the settings panel explains them. */}
+              {isModerator && (
+                <Styled.Actions>
+                  <BBButton
+                    fullWidth
+                    variant="secondary"
+                    size="sm"
+                    label="Reiniciar"
+                    iconStart={<MdRestartAlt />}
+                    ariaLabel={`Reiniciar pontos, volta ao nível ${INITIAL_POINTS}`}
+                    tooltipLabel={`Reiniciar (nível ${INITIAL_POINTS})`}
+                    disabled={points === INITIAL_POINTS}
+                    dataTest="class-mascot-floating-reset"
+                    onClick={onReset}
+                  />
+                  {addPointButton}
+                </Styled.Actions>
+              )}
             </Styled.Body>
           )}
         </>

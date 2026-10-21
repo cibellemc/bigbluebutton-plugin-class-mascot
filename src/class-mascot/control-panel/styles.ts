@@ -53,7 +53,7 @@ const Section = styled.section`
 
 const ModelOptions = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: ${spacingSmall};
 `;
 
@@ -86,24 +86,76 @@ const ModelOption = styled.button<{ $selected: boolean }>`
   }
 `;
 
-const Preview = styled.div`
+// Current level on top, with reset and +1 below it.
+const Status = styled.div`
   display: flex;
-  justify-content: center;
-  padding: ${spacingMedium};
+  flex-direction: column;
+  gap: ${spacingSmall};
+  padding: ${spacingSmall};
   border-radius: ${borderRadiusSmall};
   background-color: ${colors.background.light};
 `;
 
-// Stays at the bottom of the panel while the content above scrolls.
-const Footer = styled.div`
+const StatusRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacingSmall};
+`;
+
+const StatusActions = styled.div`
   display: flex;
   gap: ${spacingSmall};
-  padding: ${spacingMedium};
-  border-top: 1px solid ${colors.neutral.neutral4};
 
   & > * {
     flex: 1 1 0;
     min-width: 0;
+  }
+`;
+
+// Bigger than the body text, so the level reads at a glance (the client's 1.25rem).
+const LevelText = styled.span`
+  color: ${colors.text.default};
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+`;
+
+const StatusLevel = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: ${spacingXSmall};
+  min-width: 0;
+`;
+
+const Stepper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacingSmall};
+`;
+
+const StepperInput = styled.input`
+  box-sizing: border-box;
+  width: 4.5rem;
+  /* Same height as the md round buttons on each side. */
+  height: 3rem;
+  padding: ${spacingXSmall} ${spacingSmall};
+  font-size: 1.25rem;
+  font-weight: 700;
+  border: 1px solid ${colors.neutral.neutral4};
+  border-radius: ${borderRadiusSmall};
+  background-color: ${colors.background.white};
+  color: ${colors.text.default};
+  font-family: inherit;
+  text-align: center;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px ${colors.border.focusRing};
+  }
+
+  &:disabled {
+    opacity: 0.5;
   }
 `;
 
@@ -116,6 +168,11 @@ export default {
   Section,
   ModelOptions,
   ModelOption,
-  Preview,
-  Footer,
+  Status,
+  StatusRow,
+  StatusActions,
+  StatusLevel,
+  LevelText,
+  Stepper,
+  StepperInput,
 };

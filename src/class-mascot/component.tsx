@@ -8,6 +8,8 @@ import {
   DataChannelTypes,
   FloatingWindow,
   GenericContentSidekickArea,
+  NavBarButton,
+  NavBarItemPosition,
   PluginApi,
   pluginLogger,
 } from 'bigbluebutton-html-plugin-sdk';
@@ -29,12 +31,21 @@ import {
   setInactivityMinutes,
 } from './state';
 import FloatingMascot from './floating-mascot/component';
-import { readSavedPosition, savePositionOnDrop } from './floating-mascot/position';
+import {
+  positionBelow,
+  readOpen,
+  readSavedPosition,
+  saveOpen,
+  savePositionOnDrop,
+} from './floating-mascot/position';
+import { CARD_WIDTH_REM } from './floating-mascot/styles';
 
 const MODERATOR_ROLE = 'MODERATOR';
 // BBB keeps a floating window (and where it was dragged) while its id stays the same.
 const FLOATING_WINDOW_ID = 'class-mascot-floating-window';
 const SETTINGS_PANEL_ID = 'class-mascot-settings';
+const NAV_BAR_BUTTON_ID = 'class-mascot-nav-bar-button';
+const NAV_BAR_BUTTON_DATA_TEST = 'class-mascot-nav-bar-button';
 // Same radius as the Live sidebar panels (measured; the library token is 1rem).
 const FLOATING_WINDOW_RADIUS = '14px';
 
@@ -126,6 +137,15 @@ function ClassMascot({ pluginUuid: uuid, assetsBaseUrl }: ClassMascotProps): Rea
   };
 
   const isMascotVisible = !!mascotState && isVisible(mascotState);
+  // Each user can close and reopen the floating window for themselves from the top bar.
+  const [isWindowOpen, setWindowOpen] = useState<boolean>(readOpen);
+  const showFloatingWindow = isMascotVisible && isWindowOpen;
+  const toggleWindow = () => {
+    setWindowOpen((open) => {
+      saveOpen(!open);
+      return !open;
+    });
+  };
 
   const openSettings = () => pluginApi.uiCommands?.sidekickArea.panel.open(SETTINGS_PANEL_ID);
 
@@ -155,6 +175,7 @@ function ClassMascot({ pluginUuid: uuid, assetsBaseUrl }: ClassMascotProps): Rea
         mascotState={state}
         isModerator={moderator}
         onAddPoint={() => latest.current.onAddPoint()}
+        onReset={() => latest.current.onReset()}
         onOpenSettings={openSettings}
         onHide={() => latest.current.onHide()}
       />
@@ -206,15 +227,43 @@ function ClassMascot({ pluginUuid: uuid, assetsBaseUrl }: ClassMascotProps): Rea
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isModerator]);
 
-  // Everyone in the room sees the mascot once a moderator picks one. The window is
-  // only created when the mascot shows up, so a +1 does not move it back.
+  // Paw button on the right of the top bar, for everyone while the mascot is shown.
   useEffect(() => {
     if (!isMascotVisible) {
+      pluginApi.setNavBarItems([]);
+      return;
+    }
+    pluginApi.setNavBarItems([
+      new NavBarButton({
+        id: NAV_BAR_BUTTON_ID,
+        label: isWindowOpen ? 'Esconder o mascote' : 'Mostrar o mascote',
+        tooltip: isWindowOpen ? 'Esconder o mascote (só para você)' : 'Mostrar o mascote',
+        icon: { svgContent: <MdPets /> },
+        circle: true,
+        hideLabel: true,
+        disabled: false,
+        position: NavBarItemPosition.RIGHT,
+        hasSeparator: false,
+        dataTest: NAV_BAR_BUTTON_DATA_TEST,
+        onClick: toggleWindow,
+      }),
+    ]);
+    // toggleWindow only uses the state setter, so it does not need to be a dependency.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMascotVisible, isWindowOpen]);
+
+  // Everyone in the room sees the mascot once a moderator picks one, unless they
+  // closed it from the top bar. The window is only created when it shows up, so a
+  // +1 does not move it back.
+  useEffect(() => {
+    if (!showFloatingWindow) {
       floatingTarget.current = null;
       pluginApi.setFloatingWindows([]);
       return;
     }
-    const { top, left } = readSavedPosition();
+    // Opens below the paw button; where it was last dropped if the button is not shown.
+    const anchor = document.querySelector(`[data-test="${NAV_BAR_BUTTON_DATA_TEST}"]`);
+    const { top, left } = positionBelow(anchor, CARD_WIDTH_REM) ?? readSavedPosition();
     const floatingWindow = new FloatingWindow({
       id: FLOATING_WINDOW_ID,
       top,
@@ -235,7 +284,7 @@ function ClassMascot({ pluginUuid: uuid, assetsBaseUrl }: ClassMascotProps): Rea
     pluginApi.setFloatingWindows([floatingWindow]);
     // Recreating the window on other changes would reset where it was dragged.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMascotVisible]);
+  }, [showFloatingWindow]);
 
   useEffect(() => {
     renderFloatingContent();
